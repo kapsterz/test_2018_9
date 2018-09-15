@@ -1,0 +1,64 @@
+<configuration>
+
+  <conversionRule conversionWord="md5" converterClass="com.qvantel.servicetemplate.runner.ChecksumConverter"
+                  timeZone="GMT"/>
+  <conversionRule conversionWord="traceToken" converterClass="kamon.trace.logging.LogbackTraceTokenConverter"/>
+
+  <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+    <resetJUL>true</resetJUL>
+  </contextListener>
+
+  <!-- Text to console, mainly used in development and when no Logstash is available -->
+  <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%date{yyyy-MM-dd'T'HH:mm:ss'Z',UTC} %-5level [%traceToken][%X{akkaSource}] %logger{55} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="console-audit" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+      <timeZone>UTC</timeZone>
+      <fieldNames>
+        <level>log_level</level>
+      </fieldNames>
+      <provider class="net.logstash.logback.composite.loggingevent.LoggingEventPatternJsonProvider">
+        <pattern>
+          {
+          "service_name": "${SERVICE_NAME}",
+          "artifact_id": "${MARATHON_APP_DOCKER_IMAGE}",
+          "trace_token": "%traceToken",
+          "log_type": "%mdc{log_type:-LOG}",
+          "md5": "%md5{1,UTC}"
+          }
+        </pattern>
+      </provider>
+    </encoder>
+  </appender>
+
+  <logger name="play" level="info"/>
+  <logger name="play.filters" level="info"/>
+  <logger name="org.pac4j" level="info"/>
+  <logger name="spray.client" level="info"/>
+  <logger name="spray.http" level="info"/>
+  <logger name="akka.io.TcpListener" level="info"/>
+  <logger name="akka" level="info"/>
+  <logger name="org.opensaml" level="INFO"/>
+  <logger name="net.shibboleth" level="INFO"/>
+  <logger name="com.qvantel.servicetemplate" level="info"/>
+  <logger name="com.typesafe.sslconfig" level="info"/>
+  <logger name="com.typesafe.sslconfig.ssl.ConfigSSLContextBuilder" level="error"/>
+
+  <logger name="com.qvantel.rubik.csr.security.authorization" level="debug"/>
+  <logger name="com.qvantel.rubik.csr.controllers.ExternalAssets" level="error"/>
+  <logger name="com.qvantel.rubik.csr" level="debug"/>
+  <logger name="com.ning.http.client" level="info"/>
+
+  <logger name="AuditTrail" level="info" additivity="false">
+    <appender-ref ref="console-audit"/>
+  </logger>
+
+  <root level="info">
+    <appender-ref ref="console"/>
+  </root>
+
+</configuration>
