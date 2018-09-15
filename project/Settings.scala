@@ -31,7 +31,7 @@ object Settings {
 
   lazy val webBuildSettings = Seq(
     routesGenerator := InjectedRoutesGenerator,
-    unmanagedResourceDirectories in Test <+= baseDirectory(_ / "target/slaServiceApi/public/test"),
+    unmanagedResourceDirectories in Test += baseDirectory(_ / "target/slaServiceApi/public/test").value,
     javaOptions in Universal ++= Seq(
       "-Dfile.encoding=UTF-8",
       "-Dpidfile.path=/dev/null",

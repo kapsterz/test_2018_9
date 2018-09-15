@@ -1,19 +1,21 @@
 package com.osmolovskyi.test.controllers
 
-import javax.inject._
-
 import akka.actor.ActorSystem
+import com.osmolovskyi.test.services.ThrottlingService
+import javax.inject._
 import play.api.mvc._
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future, Promise}
 
 @Singleton
-class MainController @Inject()(cc: ControllerComponents, actorSystem: ActorSystem)
+class MainController @Inject()(cc: ControllerComponents,
+                               actorSystem: ActorSystem,
+                               throttlingService: ThrottlingService)
                               (implicit exec: ExecutionContext) extends AbstractController(cc) {
 
-  def message = Action.async {
-    getFutureMessage(1.second).map { msg => Ok(msg) }
+  def test(token: Option[String]) = Action {
+    Ok(throttlingService.isRequestAllowed(token).toString)
   }
 
   private def getFutureMessage(delayTime: FiniteDuration): Future[String] = {

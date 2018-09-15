@@ -2,6 +2,7 @@ package com.osmolovskyi.test.services
 
 import com.osmolovskyi.test.helpers.DefaultValues
 import com.osmolovskyi.test.models.Sla
+import com.typesafe.scalalogging.LazyLogging
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 
@@ -14,9 +15,9 @@ trait SlaService {
 
 @Singleton
 class SlaServiceImpl @Inject()(configuration: Configuration)
-                              (implicit ec: ExecutionContext) extends SlaService {
+                              (implicit ec: ExecutionContext) extends SlaService with LazyLogging {
   private lazy val userPool: Seq[Sla] = (1 to userCount).map { _ =>
-    val userName = Random.nextString(userNameLength)
+    val userName = Random.alphanumeric.take(userNameLength).mkString
     val rps = Random.nextInt(rpsRange)
     Sla(userName, rps)
   }
