@@ -10,6 +10,7 @@ import play.api.Configuration
 import play.api.cache.{AsyncCacheApi, NamedCache}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
 
 @Singleton
 class SlaServiceActor(slaService: SlaService,
@@ -19,14 +20,13 @@ class SlaServiceActor(slaService: SlaService,
 
   override def receive: Receive = receiveWithTokenBuffer(Set.empty)
 
-  private def receiveWithTokenBuffer(tokenBuffer: Set[Buffer]): Receive = {
-    case GetSla(token) if tokenBuffer.forall(_.token != token) =>
+  private def receiveWithTokenBuffer(tokenBuffer: Set[String]): Receive = {
+    case GetSla(token) if !tokenBuffer.contains(token) =>
       val sndr = sender()
-      val response = cache.get[Sla](token).flatMap {
+      cache.get[Sla](token).flatMap {
         case Some(sla) => Future.successful(sla)
         case None => slaService.getSlaByToken(token)
       }.flatMap { resp =>
-        logger.info("!!!!!22!!!!")
         cache.set(token, resp).map { _ =>
           sndr ! resp
           self ! SlaReceived(token)
@@ -34,13 +34,13 @@ class SlaServiceActor(slaService: SlaService,
         }
       }
 
-      context.become(receiveWithTokenBuffer(tokenBuffer + Buffer(token, response)))
+      context.become(receiveWithTokenBuffer(tokenBuffer + token))
 
-    case GetSla(token) =>
-      tokenBuffer.find(_.token == token).get.response.map(sender() ! _)
+    case getSla: GetSla =>
+      context.system.scheduler.scheduleOnce(50.millis, self, getSla)
 
     case SlaReceived(token) =>
-      context.become(receiveWithTokenBuffer(tokenBuffer.filter(_.token == token)))
+      context.become(receiveWithTokenBuffer(tokenBuffer - token))
 
     case message =>
       logger.error(s"Received unexpected message: $message")
@@ -58,6 +58,5 @@ object SlaServiceActor {
 
   case class SlaReceived(token: String)
 
-  case class Buffer(token: String, response: Future[Sla])
 
 }

@@ -18,7 +18,7 @@ class UserActor(rps: Int)(implicit ec: ExecutionContext) extends Actor with Lazy
       sender() ! true
 
     case RequestInProgress(_) =>
-      context.system.scheduler.scheduleOnce(100.millis, self, LimitCounted((rps * 1.1).toInt))
+      context.system.scheduler.scheduleOnce(100.millis, self, LimitCounted(Math.ceil(rps * 1.1).toInt))
       logger.warn(s"RPS limit exceeded. New limit will be applied after 0.1 second")
       sender() ! false
 
@@ -44,7 +44,8 @@ class UserActor(rps: Int)(implicit ec: ExecutionContext) extends Actor with Lazy
 
 object UserActor {
 
-  def props(rps: Int)(implicit ec: ExecutionContext): Props = Props(new UserActor(rps)).withDispatcher("mailboxes.user-dispatcher")
+  def props(rps: Int)(implicit ec: ExecutionContext): Props =
+    Props(new UserActor(rps)).withDispatcher("mailboxes.user-dispatcher")
 
   case class RequestInProgress(id: UUID)
 

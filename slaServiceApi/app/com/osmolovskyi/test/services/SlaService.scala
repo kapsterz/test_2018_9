@@ -27,7 +27,7 @@ class SlaServiceImpl @Inject()(configuration: Configuration)
   private lazy val rpsRange: Int =
     configuration.getOptional[Int]("slaService.user.rpsRange").getOrElse(DefaultValues.rpsRange)
   private lazy val slaResponseTime: Int =
-    configuration.getOptional[Int]("slaService.user.rpsRange").getOrElse(DefaultValues.slaResponseTime)
+    configuration.getOptional[Int]("slaService.user.slaResponseTime").getOrElse(DefaultValues.slaResponseTime)
   private lazy val userCount: Int =
     configuration.getOptional[Int]("slaService.userCount").getOrElse(DefaultValues.userCount)
 

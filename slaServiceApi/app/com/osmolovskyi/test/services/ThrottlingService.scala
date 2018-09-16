@@ -37,7 +37,7 @@ class ThrottlingServiceImpl @Inject()(@NamedCache("user-actor-cache") asyncCache
       .getOrElse(DefaultValues.defaultTimeout)
       .seconds
   val slaService: SlaService = slaServiceImpl
-  val graceRps: Int = configuration.getOptional[Int]("app.user.graceRps").getOrElse(DefaultValues.defaultGraceRps)
+  val graceRps: Int = configuration.getOptional[Int]("slaService.graceRps").getOrElse(DefaultValues.defaultGraceRps)
 
   def isRequestAllowed(tokenOpt: Option[String]): Boolean = {
     val id = UUID.randomUUID()
@@ -46,21 +46,16 @@ class ThrottlingServiceImpl @Inject()(@NamedCache("user-actor-cache") asyncCache
       case true =>
         tokenOpt match {
           case Some(token) =>
-            logger.info("!!!!!!")
             for {
               sla <- slaHelperService.getSlaByToken(token)
-              _ = logger.info("1!!!!")
               userActorOpt <- asyncCacheApi.get[ActorRef](sla.user)
-              _ = logger.info("2!!!!")
               userActor <- userActorOpt.map(Future.successful).getOrElse {
-                logger.info("3!!!!")
                 val newUserActor = as.actorOf(UserActor.props(sla.rps), sla.user)
                 asyncCacheApi.set(sla.user, newUserActor).map { _ =>
                   logger.info(s"Created new actor for user ${sla.user}")
                   newUserActor
                 }
               }
-              _ = logger.info("4!!!!")
               result <- processRequest(userActor, id, sla.user, token)
             } yield result
 
