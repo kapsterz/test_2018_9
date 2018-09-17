@@ -17,5 +17,7 @@ class UserMailbox(settings: ActorSystem.Settings, config: Config)
 
       case _: LimitCounted => 0
 
+      case _ => 4
+
     })
 

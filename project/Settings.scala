@@ -17,7 +17,6 @@ object Settings {
       "-target:jvm-1.8",
       "-unchecked", // additional warnings where generated code depends on assumptions
       "-Ywarn-adapted-args", // Warn if an argument list is modified to match the receiver
-      "-Ywarn-value-discard", // Warn when non-Unit expression results are unused
       "-Ywarn-inaccessible",
       "-Ywarn-dead-code",
       "-Xprint-types"

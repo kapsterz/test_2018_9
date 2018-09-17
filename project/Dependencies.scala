@@ -9,6 +9,7 @@ object Dependencies {
     val scalamock = "3.6.0"
     val scalatest = "3.0.5"
     val scalaTestPlusPlay = "3.1.2"
+    val `akka-testkit` = "2.5.16"
   }
 
   object Core {
@@ -21,8 +22,8 @@ object Dependencies {
     val scalatest = "org.scalatest" %% "scalatest" % Version.scalatest
     val scalatestplusPlay = "org.scalatestplus.play" %% "scalatestplus-play" % Version.scalaTestPlusPlay
     val scalamock = "org.scalamock" %% "scalamock-scalatest-support" % Version.scalamock
-
-    val deps = Seq(libraryDependencies ++= test(scalatest, scalatestplusPlay, scalamock))
+    val `akka-testkit` = "com.typesafe.akka" %% "akka-testkit" % Version.`akka-testkit`
+    val deps = Seq(libraryDependencies ++= test(scalatest, scalatestplusPlay, scalamock, `akka-testkit`))
   }
 
   def test(m: ModuleID*): Seq[ModuleID] = m map (_ % "test")

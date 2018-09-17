@@ -19,18 +19,18 @@ class UserActor(rps: Int)(implicit ec: ExecutionContext) extends Actor with Lazy
 
     case RequestInProgress(_) =>
       context.system.scheduler.scheduleOnce(100.millis, self, LimitCounted(Math.ceil(rps * 1.1).toInt))
-      logger.warn(s"RPS limit exceeded. New limit will be applied after 0.1 second")
+      logger.debug(s"RPS limit exceeded. New limit will be applied after 0.1 second")
       sender() ! false
 
     case RequestProcessed(id) if skipProcessedIds.contains(id) =>
       context.become(receiveWithCounter(count, rps, skipProcessedIds - id))
 
     case RequestProcessed(_) =>
-      context.become(receiveWithCounter(count, rps, skipProcessedIds))
+      context.become(receiveWithCounter(count - 1, rps, skipProcessedIds))
 
     case LimitCounted(newRps) =>
       context.become(receiveWithCounter(count, newRps, skipProcessedIds))
-      logger.info(s"RPS limit was changed to $newRps")
+      logger.debug(s"RPS limit was changed to $newRps")
 
     case RequestForceProcessed(id) =>
       context.become(receiveWithCounter(count - 1, rps, skipProcessedIds + id))
