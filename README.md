@@ -71,3 +71,5 @@ In tests was used as default values
     Grace RPS:              1000
     Users count:            1000
     SLA Response Timeout:   250 millis
+    
+Environment: Tests was runnin on Macbook pro 13 2017.
